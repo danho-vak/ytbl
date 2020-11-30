@@ -1,0 +1,77 @@
+
+.wrap {
+        position: absolute;
+        left: 0;bottom: 40px;width: 270px;height: 35px;margin-left: -144px;
+        text-align: center;overflow: hidden;font-size: 12px;
+        font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;
+        }
+.wrap * {
+    padding: 0;
+    margin: 0;
+    }
+.info .title {
+    padding: 1px 0 0 0;height: 30px;background: #fff;
+    border-bottom: 1px solid #ddd;font-size: 18px;font-weight: bold;
+    }
+
+input[type=text], input[type=email], input[type=password], textarea {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+table > tbody > tr > th {
+    text-align:center;
+}
+
+#container_child_div {
+     margin:5% auto;
+
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+.form-signin .checkbox {
+  font-weight: 400;
+}
+.form-signin .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}

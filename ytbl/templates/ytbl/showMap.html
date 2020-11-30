@@ -1,0 +1,277 @@
+{% extends 'ytbl/base.html' %}
+{% load static %}
+{% block content %}
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e5ffd9a48b90ab82db0a37149501325c&libraries=services"></script>
+<div class="container-fluid" style="height:calc(100% - 10%);">
+    <div class="row" style="margin-top:15px; position:fixed; z-index:2;">
+        <ul class="list-group">
+            <li class="list-group-item px-0 py-1">
+                <button class="btn" type="button" onclick="location.href='{% url 'ytbl:showMap'%}'">
+                  <img src="{% static 'ytbl/img/all_btn.png' %}">
+                </button>
+            </li>
+            <li class="list-group-item px-0 py-1">
+                <button class="btn" type="button" onclick="location.href='{% url 'ytbl:showMap'%}?type_code=1'">
+                    <img src="{% static 'ytbl/img/cb_btn.png' %}">
+                </button>
+            </li>
+            <li class="list-group-item px-0 py-1">
+                <button class="btn" type="button" onclick="location.href='{% url 'ytbl:showMap'%}?type_code=2'">
+                    <img src="{% static 'ytbl/img/bl_btn.png' %}">
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="row" style="margin-top:200px; position:fixed; z-index:2;">
+        <ul class="list-group mt-4">
+            <li class="list-group-item px-0 py-1">
+                <button class="btn" type="button" onclick="panTo();">
+                    <img src="{% static 'ytbl/img/where_am_i_btn.png' %}">
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="row" style="height:100%">
+    <div class="col-12 text-center" style="padding-left:0px; padding-right:0px;">
+        <div id="map" style="width:100%; height:100%;">
+            <script>
+            ////////////////////////////////////////////////////////// get URL Parameter 부분 ////////////////////////////////////////////////////////////////////////
+                    function getParameterByName(name) {
+                        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+                        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                            results = regex.exec(location.search);
+                        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+                    }
+
+                    var url_param_type_code = getParameterByName('type_code');
+
+            ////////////////////////////////////////////////////////// JSON data 로드 부분 ////////////////////////////////////////////////////////////////////////
+                    var positions = new Array();
+
+                    var jsonData = {{ data | safe }};
+
+                    for (var i=0; i<jsonData.length; i++){
+                        positions.push({
+                                title: jsonData[i].lot_number,
+                                latlng: new kakao.maps.LatLng(jsonData[i].latitude, jsonData[i].longitude),
+                                type_code: jsonData[i].type_code,
+                                is_next_to: jsonData[i].is_next_to
+                        });
+                    }
+
+            ////////////////////////////////////////////////////////// Map 부분 ////////////////////////////////////////////////////////////////////////
+                    var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+                        mapOption = {
+                            center: new kakao.maps.LatLng(37.552109, 127.090651), // 지도의 중심좌표
+                            level: 2 // 지도의 확대 레벨
+                        };
+
+                    var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+
+                    // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
+                    var mapTypeControl = new kakao.maps.MapTypeControl();
+
+                    // 지도에 컨트롤을 추가해야 지도위에 표시됩니다
+                    // kakao.maps.ControlPosition은 컨트롤이 표시될 위치를 정의하는데 TOPRIGHT는 오른쪽 위를 의미합니다
+                    map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+
+                    // 지도 확대 축소를 제어할 수 있는  줌 컨트롤을 생성합니다
+                    var zoomControl = new kakao.maps.ZoomControl();
+                    map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+
+
+            ////////////////////////////////////////////////////////// Geolocation 부분 ////////////////////////////////////////////////////////////////////////
+
+                    // HTML5의 geolocation으로 사용할 수 있는지 확인합니다
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(position) {   // GeoLocation을 이용해서 접속 위치를 얻어옵니다
+                            var lat = position.coords.latitude, // 위도
+                                lon = position.coords.longitude; // 경도
+                            var locPosition = new kakao.maps.LatLng(lat, lon) // 마커가 표시될 위치를 geolocation으로 얻어온 좌표로 생성합니다
+                            displayMarker(locPosition); // 마커와 인포윈도우를 표시합니다
+                          });
+                    } else { // HTML5의 GeoLocation을 사용할 수 없을때 마커 표시 위치와 인포윈도우 내용을 설정합니다
+                        var locPosition = new kakao.maps.LatLng(33.450701, 126.570667)
+                        displayMarker(locPosition);
+                    }
+
+
+                    // User Pin image 부분
+                    var geoimageSrc = "{% static 'ytbl/img/user_pin_small.png' %}";
+                    var geoimageSize = new kakao.maps.Size(27, 36);
+                    var geomarkerImage = new kakao.maps.MarkerImage(geoimageSrc, geoimageSize);
+
+                    // 지도에 마커와 인포윈도우를 표시하는 함수입니다
+                    function displayMarker(locPosition) {
+                        var marker = new kakao.maps.Marker({    // 마커를 생성합니다
+                            map: map,
+                            image : geomarkerImage,
+                            position: locPosition
+                        });
+                        map.setCenter(locPosition); // 지도 중심좌표를 접속위치로 변경합니다
+                    }
+
+
+                    function panTo() {   // 내 위치로 지도 옮기는 function
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(function(position) {   // GeoLocation을 이용해서 접속 위치를 얻어옵니다
+                                var lat = position.coords.latitude, // 위도
+                                    lon = position.coords.longitude; // 경도
+                                var moveLatLon = new kakao.maps.LatLng(lat, lon)
+                                map.panTo(moveLatLon);
+                              });
+                        } else { // HTML5의 GeoLocation을 사용할 수 없을때 마커 표시 위치와 인포윈도우 내용을 설정합니다
+                            var moveLatLon = new kakao.maps.LatLng(33.450701, 126.570667)
+                            map.panTo(moveLatLon);
+                        }
+                    }
+
+            ////////////////////////////////////////////////////////// Data Maker 생성 부분 ////////////////////////////////////////////////////////////////////////
+
+                    // 마커 이미지의 이미지 주소입니다
+                    var imageSrc = "";
+
+                    // 마커 이미지의 이미지 크기 입니다
+                    var imageSize = new kakao.maps.Size(27, 36);
+
+
+            ////////////////////////////////////////////////////////// Maker img 생성 부분 ////////////////////////////////////////////////////////////////////////
+
+                    positions.forEach(function(data){
+                        if (url_param_type_code == "") {
+                            if (data.is_next_to) {
+                                imageSrc = "{% static 'ytbl/img/mixed_pin_small.png' %}";
+                            }else {
+                                if (data.type_code == 1) {
+                                    imageSrc = "{% static 'ytbl/img/cb_pin_small.png' %}";
+                                }else {
+                                    imageSrc = "{% static 'ytbl/img/bl_pin_small.png' %}";
+                                }
+                            }
+                        }else if (url_param_type_code == "1"){
+                            if (data.is_next_to) {
+                                imageSrc = "{% static 'ytbl/img/mixed_pin_small.png' %}";
+                            }else {
+                                imageSrc = "{% static 'ytbl/img/cb_pin_small.png' %}";
+                            }
+
+                        }else if (url_param_type_code == "2"){
+                            if (data.is_next_to) {
+                                imageSrc = "{% static 'ytbl/img/mixed_pin_small.png' %}";
+                            }else {
+                                imageSrc = "{% static 'ytbl/img/bl_pin_small.png' %}";
+                            }
+
+                        }
+
+                        // 마커 이미지를 생성합니다
+                        var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+
+                        // 마커를 생성합니다
+                        var marker = new kakao.maps.Marker({
+                            map: map, // 마커를 표시할 지도
+                            position: data.latlng, // 마커를 표시할 위치
+                            image : markerImage // 마커 이미지
+                        });
+
+                        var content = '<div class="wrap">' +
+                                    '    <div class="info">' +
+                                    '        <div class="title text-dark">' +
+                                                    data.title +
+                                    '        </div>' +
+                                    '    </div>' +
+                                    '</div>';
+
+                        // 마커 위에 커스텀오버레이를 표시합니다
+                        // 마커를 중심으로 커스텀 오버레이를 표시하기위해 CSS를 이용해 위치를 설정했습니다
+                            var overlay = new kakao.maps.CustomOverlay({
+                            content: content,
+                            map: map,
+                            position: marker.getPosition()
+                        });
+
+                        // 맵 로드시 커스텀오버레이 미표시
+
+                        overlay.setMap(null);
+
+                        // 모바일 여부 체크
+                        if(navigator.platform){
+                            var filter = "win16|win32|win64|mac";
+                            if (0 > filter.indexOf(navigator.platform.toLowerCase())) {
+                                kakao.maps.event.addListener(marker, 'click', function() {
+                                    if (overlay.getMap() == null){
+                                        overlay.setMap(map);
+                                    }else {
+                                        overlay.setMap(null);
+                                    }
+                                });
+                            }else {
+                                // 마커를 클릭했을 때 커스텀 오버레이를 표시합니다
+                                kakao.maps.event.addListener(marker, 'mouseover', function() {
+                                    overlay.setMap(map);
+                                });
+                                kakao.maps.event.addListener(marker, 'mouseout', function() {
+                                    overlay.setMap(null);
+                                });
+                            }
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex justify-content-around fixed-bottom" style="margin-bottom:5%;">
+        <button type="button" class="btn btn-lg btn-warning shadow" data-toggle="modal" data-target="#exampleModal" onclick="cleanInput();">동네로 찾아보기</button>
+    </div>
+</div>
+
+<!-- 검색창 modal 부분 -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="find-name" class="col-form-label text-dark">어디를 찾아볼까요?</label>
+                    <input type="text" class="form-control" id="find-name" onkeydown="enterKeyDown();" placeholder="ex)군자역 또는 중곡동">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeBtn" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                <button type="button" class="btn btn-primary" onclick="javascript:searchMap(document.getElementById('find-name').value);" data-dismiss="modal">찾아보기</button>
+                <script>
+                    function cleanInput() {
+                        document.getElementById('find-name').value = "";
+                    }
+                    function enterKeyDown(){
+                        if (window.event.keyCode == 13){
+                            searchMap(document.getElementById('find-name').value);
+                            document.getElementById('closeBtn').click();
+                        }
+                    }
+                    function searchMap(target){
+                        // 장소 검색 객체를 생성합니다
+                        var ps = new kakao.maps.services.Places();
+
+                        // 키워드로 장소를 검색합니다
+                        ps.keywordSearch(target, placesSearchCB);
+
+                        // 키워드 검색 완료 시 호출되는 콜백함수 입니다
+                        function placesSearchCB (data, status) {
+                            if (status === kakao.maps.services.Status.OK) {
+                                var bounds = new kakao.maps.LatLngBounds();
+                                bounds.extend(new kakao.maps.LatLng(data[0].y, data[0].x));
+                                //장소 위치를 기준으로 지도 범위를 재설정합니다
+                                map.setBounds(bounds);
+                            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                                alert('어딘지 모르겠어요 :(');
+                            } else {
+                                alert('카카오맵 응답 에러!');
+                            }
+                        }
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

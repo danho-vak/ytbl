@@ -1,0 +1,23 @@
+<table class="table table-sm mb-0 border-bottom">
+    <tbody>
+        {% if comment %}
+        <tr class="text-left">
+            <th scope="row">
+                <small class="font-weight-bold">{{ comment.author.username }}</small>
+            </th>
+            <td class="col-6">
+                <small>{{ comment.content }}</small>
+            </td>
+            <td class="text-right">
+                <small>{{ comment.created_at | date:"Y.m.d." }}</small>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td>
+                <small>아직 댓글이 없네요..!</small>
+            </td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>

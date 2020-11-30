@@ -1,0 +1,51 @@
+<div class="collapse" id="collapseExample_{{ post.id }}">
+    <div class="card card-body border-0" style="background-color:#fafafa;">
+        <div class="card-text text-muted text-left">
+            <small>가장 최근 댓글이에요!</small>
+        </div>
+        <div class="row card-text" id="in_collapse_comments_{{ post.id }}">
+        </div>
+        <div class="card-text">
+<!--            getPostComment({{ post.id }})  data-toggle="modal" data-target="#scrollableModal" data-backdrop.in="5"-->
+            <a role="button" onclick="location.href='{% url 'social:postDetail' post_id=post.id %}';">
+                <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-eyeglasses" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M4 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm2.625.547a3 3 0 0 0-5.584.953H.5a.5.5 0 0 0 0 1h.541A3 3 0 0 0 7 8a1 1 0 0 1 2 0 3 3 0 0 0 5.959.5h.541a.5.5 0 0 0 0-1h-.541a3 3 0 0 0-5.584-.953A1.993 1.993 0 0 0 8 6c-.532 0-1.016.208-1.375.547zM14 8a2 2 0 1 0-4 0 2 2 0 0 0 4 0z"/>
+                </svg>
+                <small>더보기</small>
+            </a>
+        </div>
+    </div>
+    <div class="card-footer pt-0 px-0 border-0">
+        <div class="row px-0" style="height:25px;">
+            <div class="col w-100 ">
+                <form action="{% url 'social:postCommentCreate' post_id=post.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-sm">
+                                <small>
+                                {% if user.is_authenticated %}
+                                    {{ user.username }}
+                                {% else %}
+                                    visitor
+                                {% endif %}
+                                </small>
+                            </span>
+                        </div>
+                        {% if user.is_authenticated %}
+                        <input type="text" class="form-control mt-0" name="content" placeholder="댓글은 요기요기!" required>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-primary" type="submit" id="button-addon2">등록</button>
+                        </div>
+                        {% else %}
+                        <input type="text" class="form-control mt-0" placeholder="로그인 해주세요!" onclick="javascript:loginRequired();">
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-primary" type="button" onclick="javascript:loginRequired();">등록</button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+{% extends 'ytbl/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container text-dark mb-5">
+    <div class="row">
+        <div class="container">
+            <div class="card" style="margin-top:30px">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h1>{{ item.title }}</h1>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-text">
+                        <div class="d-flex justify-content-end">
+                                <h6>작성자 : {{ item.author.username }}</h6>
+                        </div>
+                            <div class="col">
+                                {% if item.images %}
+                                    <img class="img-fluid" src="{{ item.images.url }}" width="800" height="800">
+                                    <br>
+                                {% endif %}
+                            </div>
+                            <div class="col">
+                                {{ item.content }}
+                            </div>
+                            <br>
+                        <p class="text-right">
+                            <small class="text-right">마지막 수정일 : {{ item.updated_at }}</small>
+                            <br>
+                            {% if item.author.username == user.username %}
+                                <button class="btn btn-secondary" onclick="location.href='{% url 'board:boardUpdate' board_id=item.id %}'">수정</button>
+                            {% endif %}
+                            {% if user.email == item.author.email or user.is_admin %}
+                                <button class="btn btn-danger" onclick="location.href='{% url 'board:boardDelete' board_id=item.id %}'">삭제</button>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        <!--      댓글 목록      -->
+        {% include "board/comment_list.html" %}
+        </div>
+    </div>
+</div>
+<!-- 상세페이지 하단 리스트 -->
+{% include "board/board_list_in_detail.html" %}
+{% endblock %}

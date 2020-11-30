@@ -1,0 +1,37 @@
+{% extends 'ytbl/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-center" id="container_child_div">
+        <table class="table table-hover">
+            {{ form.as_table }}
+            <tr>
+                <th><label>가입 일자</label></th>
+                <td><input type="text" id="id_created_id" name="created_at" size="30" value="{{ user.created_at }}" disabled="disabled"></td>
+            </tr>
+            <tr>
+                <th></th>
+                <td>
+                    <button class="btn btn-danger" onclick="location.href='{% url 'account:password' %}'">비밀번호 변경</button>
+                </td>
+            </tr>
+            <tr>
+                <th></th>
+                <td class="text-right"><button class="btn btn-secondary" onclick="userDelete()">회원탈퇴</button></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script>
+    document.getElementsByName("email")[0].setAttribute("disabled", "disabled");
+    document.getElementsByName("username")[0].setAttribute("disabled", "disabled");
+
+    function userDelete(){
+        var trigger = confirm('정말 탈퇴하시겠어요? :(');
+        if (trigger) {
+            location.href='{% url 'account:userDelete' %}';
+            alert('회원 탈퇴가 정상적으로 처리되었습니다.');
+        }
+    }
+</script>
+{% endblock %}

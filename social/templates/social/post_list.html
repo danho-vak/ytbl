@@ -1,0 +1,96 @@
+{% extends 'ytbl/base.html' %}
+{% load static %}
+{% load imagekit %} <!-- django-imagekit 로드 -->
+{% block content %}
+<script src="{% static 'social/js/post_list.js' %}"></script>
+
+<div class="container mt-4 text-center text-dark" id="post_main_container">
+    {% if user.is_authenticated %}
+        {% include 'social/post_create.html' %}
+    {% endif %}
+    {% for post in items %}
+    <div class="card mb-5" style="background-color:#f2f2f2;">
+        <input type="hidden" id="id_post_{{ post.id }}" value="{{ post.id }}">
+        <div class="card-body text-left">
+            <div class="card-title border-bottom">
+                <div class="row justify-content-between">
+                    <div class="col-auto">
+                        <h6>{{ post.author }}</h6>
+                    </div>
+                    {% if post.author.email == user.email %}
+                        <div class="col-auto dropright" id="dropdown_btn_{{ post.id }}">
+                             <button type="button" class="btn dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-three-dots" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                                </svg>
+                             </button>
+                            <div class="dropdown-menu text-center" aria-labelledby="dropdownMenuButton" style="min-width:30px; background-color:#f2f2f2;">
+                                <a class="dropdown-item px-1" id="update_btn"  onclick="javascript:setPostToUpdateForm(this, {{ post.id }});">
+                                    <svg width="20" height="20" viewBox="0 0 16 16" class="bi bi-pencil" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5L13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175l-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                    </svg>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item px-1" id="delete_btn" onclick="javascript:postDelete({{ post.id }});">
+                                    <svg width="20" height="20" viewBox="0 0 16 16" class="bi bi-trash" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-text text-right"><small class="text-muted">{{ post.created_at }}</small></div>
+            <div class="card-text mb-4" id="post_{{ post.id }}_content">{{ post.content }}</div>
+            <div class="card-text" style="width:300px;">
+
+                {% if post.images %}
+                <a role="button" id="image_detail_btn" data-toggle="modal" data-target="#imageModal" data-origin="{{ post.images.url }}">
+                    {% thumbnail "300x300" post.images %}
+                </a>
+                {% endif %}
+
+            </div>
+            <div class="card-text mt-2 ml-3">
+                <small id="likes_count" class="text-muted">{{ post.likes }} likes</small>
+            </div>
+            <div class="card-text">
+                <small>
+                    {% if user in post.like_users.all %}
+                    <a role="button" class="btn" onclick="ILikeThis(this, {{ post.id }})">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-suit-heart-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                        </svg>
+                    </a>
+                    {% else %}
+                    <a role="button" class="btn" onclick="ILikeThis(this, {{ post.id }})">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-suit-heart" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M8 6.236l.894-1.789c.222-.443.607-1.08 1.152-1.595C10.582 2.345 11.224 2 12 2c1.676 0 3 1.326 3 2.92 0 1.211-.554 2.066-1.868 3.37-.337.334-.721.695-1.146 1.093C10.878 10.423 9.5 11.717 8 13.447c-1.5-1.73-2.878-3.024-3.986-4.064-.425-.398-.81-.76-1.146-1.093C1.554 6.986 1 6.131 1 4.92 1 3.326 2.324 2 4 2c.776 0 1.418.345 1.954.852.545.515.93 1.152 1.152 1.595L8 6.236zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.55 7.55 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+                        </svg>
+                    </a>
+                    {% endif %}
+                </small>
+                <small>
+                      <a role="button" class="btn pr-0" id="comment_icon_{{ post.id }}" onclick="javascript:fillCommentIcon(this, {{ post.id }});" data-toggle="collapse" data-target="#collapseExample_{{ post.id }}" aria-expanded="false" aria-controls="collapseExample">
+                        <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-chat-dots" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                            <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                    </a>
+                </small>
+                {% if post.comment_count %}
+                    <span class="badge badge-pill badge-secondary">{{ post.comment_count }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% include 'social/post_comment_collapse.html' %}
+    </div>
+    {% endfor %}
+    {% include 'social/image_detail.html' %}
+    <div id="post_list_ajax"></div>
+    {% include 'social/post_list_more.html' %}
+    <input id="page" type="hidden" value="2">
+</div>
+{% endblock %}
