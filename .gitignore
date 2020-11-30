@@ -72,9 +72,10 @@ fabric.properties
 
 .idea/
 
+media/
+
 # Virtual Env
 venv/
-
 
 # Django-environ
 .env
