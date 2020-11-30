@@ -52,8 +52,6 @@ INSTALLED_APPS = [
     'account',
     'board',
     'social',
-
-    # 추가로 install한 imagekit
     'imagekit',
 ]
 
