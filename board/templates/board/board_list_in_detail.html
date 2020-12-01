@@ -10,29 +10,29 @@
             <th scope="col" style="width:5%;">작성자</th>
         </tr>
         </thead>
-    <tbody>
-    {% for list_item in list_items %}
-        {% if list_item.id == item.id%}
-        <tr class="text-center table-info">
-        {% else %}
-        <tr class="text-center">
-        {% endif %}
-            <td class="text-left" style="text-indent:2%;" onclick="location.href='{% url 'board:boardDetail' board_id=item.id %}?page={{ items.number }}'">
-                <b>
-                    {{ list_item.title }}
-                    {% if list_item.comment_count is not None and list_item.comment_count > 0 %}
-                        ({{ list_item.comment_count }})
-                    {% endif %}
-                </b>
-            </td>
-            <td>
-                <small>{{ item.author.username }}</small>
-                <br>
-                <small>{{ item.created_at | date:"Y.m.d."}}</small>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
+        <tbody>
+        {% for list_item in list_items %}
+            {% if list_item.id == item.id%}
+            <tr class="text-center table-info">
+            {% else %}
+            <tr class="text-center">
+            {% endif %}
+                <td class="text-left" style="text-indent:2%;" onclick="location.href='{% url 'board:boardDetail' board_id=list_item.id %}?page={{ list_items.number }}'">
+                    <b>
+                        {{ list_item.title }}
+                        {% if list_item.comment_count is not None and list_item.comment_count > 0 %}
+                            ({{ list_item.comment_count }})
+                        {% endif %}
+                    </b>
+                </td>
+                <td>
+                    <small>{{ item.author.username }}</small>
+                    <br>
+                    <small>{{ item.created_at | date:"Y.m.d."}}</small>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
     <div class="postbtn text-right" style="padding-right:15px;">
         <button class="btn btn-secondary" aria-label="Light Align" onclick="location.href='{% url 'board:boardList' %}'">

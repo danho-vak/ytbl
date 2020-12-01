@@ -5,12 +5,12 @@ from board.models import Board, Comment
 class BoardCreationForm(forms.ModelForm):
     class Meta:
         model = Board
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'images']
         labels = {
             'title':_('제목'),
             'content':_('내용'),
         }
-        exclude = ['author', 'images']
+        exclude = ['author']
 
 
 class CommentCreationForm(forms.ModelForm):

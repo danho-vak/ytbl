@@ -76,18 +76,14 @@ def boardUpdate(request, board_id):
     if request.method == 'POST' and board_id is not None:
         item = get_object_or_404(Board, pk=board_id)
         if request.user.get_username() == item.author.email:
-            form = BoardCreationForm(request.POST, instance=item)
+            form = BoardCreationForm(request.POST, request.FILES, instance=item)
 
             if form.is_valid():
                 form = form.save(commit=False)
-                if request.FILES['images'] :  # form으로 받은 image가 있으면
-                    if item.images is not None:  # 기존 board object에 이미지가 있으면
-                        item.images.delete() # 기존 이미지 삭제
-                        item.images = request.FILES['images']
-                    else:
-                        item.images = request.FILES['images']
+                if item.images is not None:  # 기존 board object에 이미지가 있으면
+                    item.images.delete() # 기존 이미지 삭제
 
-                    item.save()
+                item.save()
                 messages.success(request, r'게시글을 수정했어요')
             else:
                 messages.error(request, r'수정에 실패했어요')

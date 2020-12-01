@@ -17,12 +17,12 @@
                         </div>
                             <div class="col">
                                 {% if item.images %}
-                                    <img class="img-fluid" src="{{ item.images.url }}" width="800" height="800">
+                                    <img class="img-fluid" src="{{ item.images.url }}" width="500" height="500">
                                     <br>
                                 {% endif %}
                             </div>
                             <div class="col">
-                                {{ item.content }}
+                                {{ item.content | linebreaks }}
                             </div>
                             <br>
                         <p class="text-right">
