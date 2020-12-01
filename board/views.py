@@ -24,7 +24,6 @@ def boardDetail(request, board_id):
         # 상세페이지 데이터
         item = get_object_or_404(Board, pk=board_id)
         comments = Comment.objects.filter(board=item).all()
-
         # 상세페이지안에 뿌려줄 list 정보
         board_item = Board.objects.all().annotate(comment_count=Count('comment')).select_related().order_by('-created_at')
         paginator = Paginator(board_item, 10)
@@ -76,12 +75,13 @@ def boardUpdate(request, board_id):
     if request.method == 'POST' and board_id is not None:
         item = get_object_or_404(Board, pk=board_id)
         if request.user.get_username() == item.author.email:
-            form = BoardCreationForm(request.POST, request.FILES, instance=item)
-
+            form = BoardCreationForm(request.POST, instance=item)
             if form.is_valid():
-                form = form.save(commit=False)
                 if item.images is not None:  # 기존 board object에 이미지가 있으면
                     item.images.delete() # 기존 이미지 삭제
+
+                if request.FILES.get('images', None): # upload된 파일이 있으면, 없다면 None
+                    item.images = request.FILES['images']
 
                 item.save()
                 messages.success(request, r'게시글을 수정했어요')
