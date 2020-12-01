@@ -86,3 +86,9 @@ db.sqlite3
 
 # pycaches
 __pycache__/
+
+
+# DB data
+../b_l_after.csv
+../bin_places.csv
+../c_b_after.csv
